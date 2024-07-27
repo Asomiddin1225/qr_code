@@ -81,11 +81,13 @@ class HistoryScreen extends StatelessWidget {
                 ),
               )
             else
-              Text(
-                'No QR Code scanned.',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20.0,
+              Center(
+                child: Text(
+                  'No QR Code scanned.',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 20.0,
+                  ),
                 ),
               ),
             if (result != null)

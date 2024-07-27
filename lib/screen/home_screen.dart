@@ -93,8 +93,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           onPressed: () async {
                             await controller?.pauseCamera();
                           },
-                          child: const Text('pause',
-                              style: TextStyle(fontSize: 20)),
+                          // child: const Text('pause',
+                          // style: TextStyle(fontSize: 20)),
+                          child: Icon(Icons.pause),
                         ),
                       ),
                       Container(
@@ -103,8 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           onPressed: () async {
                             await controller?.resumeCamera();
                           },
-                          child: const Text('resume',
-                              style: TextStyle(fontSize: 20)),
+                          child: Icon(Icons.restart_alt),
                         ),
                       )
                     ],
@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
-        selectedItemColor: Colors.orange,
+        selectedItemColor: Colors.red,
         unselectedItemColor: Colors.black,
         currentIndex: 1, // Set the current index to the middle item
         onTap: (index) {

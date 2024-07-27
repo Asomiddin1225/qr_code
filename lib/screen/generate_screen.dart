@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:qr_code/screen/text_screen.dart';
-import 'package:qr_code/screen/web_site_screen.dart';
+import 'package:qr_code/widgets/text_screen.dart';
+import 'package:qr_code/widgets/web_site_screen.dart';
 
 class GenerateScreen extends StatefulWidget {
   const GenerateScreen({super.key});
@@ -18,6 +18,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
       ),
       body: Center(
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             InkWell(
               onTap: () {
@@ -30,7 +31,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                 );
               },
               child: Card(
-                color: Colors.blue,
+                color: Colors.orange,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(
                     16,
@@ -67,7 +68,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                 );
               },
               child: Card(
-                color: Colors.blue,
+                color: Colors.orange,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(
                     16,
