@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code/screen/generate_screen.dart';
@@ -14,7 +13,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Barcode> results = [];
+  Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
 
@@ -40,10 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  if (results.isNotEmpty)
+                  if (result != null)
                     Text(
-                      'Last scanned: Barcode Type: ${describeEnum(results.last.format)}   Data: ${results.last.code}',
-                    )
+                        'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
                   else
                     const Text('Scan a code'),
                   Row(
@@ -131,14 +129,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
           } else if (index == 1) {
-            // No action needed as it's already the QR scanner screen
+            _startQrScanner();
           } else if (index == 2) {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => HistoryScreen(
-                  results: results,
-                ),
+                builder: (context) => const HistoryScreen(),
               ),
             );
           }
@@ -155,6 +151,109 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.history),
             label: 'History',
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _startQrScanner() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => QrScannerScreen(onScan: (result) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HistoryScreen(result: result),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildQrView(BuildContext context) {
+    var scanArea = (MediaQuery.of(context).size.width < 500 ||
+            MediaQuery.of(context).size.height < 500)
+        ? 300.0
+        : 300.0;
+    return QRView(
+      key: qrKey,
+      onQRViewCreated: _onQRViewCreated,
+      overlay: QrScannerOverlayShape(
+          borderColor: Colors.orange,
+          borderRadius: 10,
+          borderLength: 30,
+          borderWidth: 10,
+          cutOutSize: scanArea),
+      onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
+    );
+  }
+
+  void _onQRViewCreated(QRViewController controller) {
+    setState(() {
+      this.controller = controller;
+    });
+    controller.scannedDataStream.listen((scanData) {
+      setState(() {
+        result = scanData;
+      });
+    });
+  }
+
+  void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
+    if (!p) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No Permission')),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
+}
+
+class QrScannerScreen extends StatefulWidget {
+  final Function(Barcode result) onScan;
+
+  const QrScannerScreen({Key? key, required this.onScan}) : super(key: key);
+
+  @override
+  _QrScannerScreenState createState() => _QrScannerScreenState();
+}
+
+class _QrScannerScreenState extends State<QrScannerScreen> {
+  Barcode? result;
+  QRViewController? controller;
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    if (Platform.isAndroid) {
+      controller?.pauseCamera();
+    }
+    controller?.resumeCamera();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: <Widget>[
+          Expanded(flex: 4, child: _buildQrView(context)),
+          Expanded(
+            flex: 1,
+            child: Center(
+              child: (result != null)
+                  ? Text(
+                      'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
+                  : const Text('Scan a code'),
+            ),
           ),
         ],
       ),
@@ -185,7 +284,8 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     controller.scannedDataStream.listen((scanData) {
       setState(() {
-        results.add(scanData);
+        result = scanData;
+        widget.onScan(result!);
       });
     });
   }
